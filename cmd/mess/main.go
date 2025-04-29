@@ -8,6 +8,7 @@ import (
 
 	"github.com/devkcud/mess/internal/core"
 	"github.com/devkcud/mess/pkg/messlog"
+	"github.com/devkcud/mess/pkg/therapy"
 )
 
 func main() {
@@ -25,10 +26,16 @@ func main() {
 	toggleSummary := cli.BoolP("summary", "s", false, "print a summary after execution")
 	loglevel := cli.Int("loglevel", int(messlog.LogLevelError), "logging output (0 = error | 1 = warn | 2 = info | 3 = debug | 4 = trace)")
 	help := cli.BoolP("help", "h", false, "help menu")
+	iamaloneandinneedforhelp := cli.BoolP("therapy", "t", false, "maybe you like it")
 
 	tokens, err := cli.Parse()
 	if err != nil {
 		log.Fatalf("failed to parse flags: %v", err)
+	}
+
+	if *iamaloneandinneedforhelp {
+		therapy.HelpMe()
+		os.Exit(69)
 	}
 
 	if *help {
