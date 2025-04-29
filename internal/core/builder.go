@@ -21,14 +21,16 @@ type builder struct {
 	wd      string
 	logger  *messlog.Logger
 	dryRun  bool
+	echo    bool
 	summary *Summary
 	tree    *node
 }
 
-func NewBuilder(base string, logger *messlog.Logger, dry bool, summary *Summary) *builder {
+func NewBuilder(base string, logger *messlog.Logger, dry bool, summary *Summary, echo bool) *builder {
 	return &builder{
 		logger:  logger,
 		dryRun:  dry,
+		echo:    echo,
 		summary: summary,
 		tree: &node{
 			Name:     base,
@@ -41,6 +43,14 @@ func NewBuilder(base string, logger *messlog.Logger, dry bool, summary *Summary)
 func (b *builder) addFolder(wd string, path string, setWD bool) (string, error) {
 	full := utils.JoinPaths(wd, path)
 	b.logger.Info("Creating folder %q (%s)", path, full)
+
+	if b.echo {
+		fmt.Printf("mkdir -p %s\n", utils.JoinPaths(wd, path))
+		if setWD {
+			wd = utils.JoinPaths(wd, path)
+		}
+		return wd, nil
+	}
 
 	if b.dryRun {
 		relPath := utils.JoinPaths(wd, path)
@@ -81,6 +91,11 @@ func (b *builder) addFile(wd string, path string) error {
 	full := utils.JoinPaths(wd, path)
 
 	b.logger.Debug("Creating file %s (%s)", path, full)
+
+	if b.echo {
+		fmt.Printf("touch %s\n", utils.JoinPaths(wd, path))
+		return nil
+	}
 
 	if b.dryRun {
 		relPath := utils.JoinPaths(wd, path)
@@ -129,6 +144,9 @@ func (b *builder) ProcessToken(token string) (err error) {
 
 	switch {
 	case token == "..":
+		if b.echo {
+			fmt.Println("cd ..")
+		}
 		b.wd = filepath.Dir(b.wd)
 
 	case strings.HasSuffix(token, utils.OSPathSeparator):

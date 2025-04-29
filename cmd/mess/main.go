@@ -23,6 +23,7 @@ func main() {
 
 	base := cli.StringP("base", "b", dir, "base working directory")
 	dryRun := cli.BoolP("dry-run", "d", false, "simulate file/folder creation without writing anything on disk")
+	echo := cli.Bool("echo", false, "print shell commands instead of creating anything")
 	toggleSummary := cli.BoolP("summary", "s", false, "print a summary after execution")
 	loglevel := cli.Int("loglevel", int(messlog.LogLevelError), "logging output (0 = error | 1 = warn | 2 = info | 3 = debug | 4 = trace)")
 	help := cli.BoolP("help", "h", false, "help menu")
@@ -54,7 +55,7 @@ func main() {
 	}
 
 	tokenIterStart := time.Now()
-	builder := core.NewBuilder(*base, logger, *dryRun, summary)
+	builder := core.NewBuilder(*base, logger, *dryRun, summary, *echo)
 	for i, token := range tokens {
 		iterStart := time.Now()
 
