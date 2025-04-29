@@ -38,8 +38,14 @@ func (n *node) printTree(prefix string, isLast bool) {
 	if isLast {
 		connector = "└── "
 	}
+
+	pref := "F"
+	if n.IsDir {
+		pref = "D"
+	}
+
 	if n.Name != "." {
-		fmt.Printf("%s%s%s\n", prefix, connector, n.Name)
+		fmt.Printf("%s%s%s %s\n", prefix, connector, pref, n.Name)
 	}
 	children := make([]*node, 0, len(n.Children))
 	for _, c := range n.Children {

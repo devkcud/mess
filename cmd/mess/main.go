@@ -20,11 +20,11 @@ func main() {
 
 	cli := core.NewCLI()
 
-	base := cli.String("base", dir, "base working directory")
-	dryRun := cli.Bool("dry-run", false, "simulate file/folder creation without writing anything on disk")
-	toggleSummary := cli.Bool("summary", false, "print a summary after execution")
+	base := cli.StringP("base", "b", dir, "base working directory")
+	dryRun := cli.BoolP("dry-run", "d", false, "simulate file/folder creation without writing anything on disk")
+	toggleSummary := cli.BoolP("summary", "s", false, "print a summary after execution")
 	loglevel := cli.Int("loglevel", int(messlog.LogLevelError), "logging output (0 = error | 1 = warn | 2 = info | 3 = debug | 4 = trace)")
-	help := cli.Bool("help", false, "help menu")
+	help := cli.BoolP("help", "h", false, "help menu")
 
 	tokens, err := cli.Parse()
 	if err != nil {

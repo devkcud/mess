@@ -1,8 +1,8 @@
 package core
 
 import (
-	"flag"
 	"fmt"
+	flag "github.com/spf13/pflag"
 	"os"
 )
 
@@ -58,4 +58,16 @@ func (fw *flagWrapper) Int(name string, def int, usage string) *int {
 
 func (fw *flagWrapper) String(name, def, usage string) *string {
 	return fw.fs.String(name, def, usage)
+}
+
+func (fw *flagWrapper) BoolP(name, shorthand string, def bool, usage string) *bool {
+	return fw.fs.BoolP(name, shorthand, def, usage)
+}
+
+func (fw *flagWrapper) IntP(name, short string, def int, usage string) *int {
+	return fw.fs.IntP(name, short, def, usage)
+}
+
+func (fw *flagWrapper) StringP(name, short, def, usage string) *string {
+	return fw.fs.StringP(name, short, def, usage)
 }
