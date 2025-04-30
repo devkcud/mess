@@ -16,7 +16,11 @@ type node struct {
 }
 
 func (root *node) addToTree(path string, isDir bool) {
-	parts := strings.Split(filepath.Clean(path), utils.OSPathSeparator)
+	p := filepath.Clean(path)
+	parts := strings.Split(p, utils.OSPathSeparator)
+	if parts[0] == "" {
+		parts = parts[1:]
+	}
 	curr := root
 
 	for i, part := range parts {
@@ -33,38 +37,64 @@ func (root *node) addToTree(path string, isDir bool) {
 	}
 }
 
-func (n *node) printTree(prefix string, isLast bool) {
+func (root *node) PrintCollapsedTree() {
+	kids := sortedChildren(root)
+	for i, child := range kids {
+		printCollapsed(child, "", i == len(kids)-1)
+	}
+}
+
+func printCollapsed(n *node, prefix string, isLast bool) {
+	parts := []string{n.Name}
+	curr := n
+	for curr.IsDir && len(curr.Children) == 1 {
+		only := firstChild(curr)
+		if !only.IsDir {
+			break
+		}
+		parts = append(parts, only.Name)
+		curr = only
+	}
+
 	connector := "├── "
 	if isLast {
 		connector = "└── "
 	}
-
-	pref := "F"
-	if n.IsDir {
-		pref = "D"
+	name := filepath.Join(parts...)
+	if curr.IsDir {
+		name += "/"
 	}
+	fmt.Printf("%s%s%s\n", prefix, connector, name)
 
-	if n.Name != "." {
-		fmt.Printf("%s%s%s %s\n", prefix, connector, pref, n.Name)
+	kids := sortedChildren(curr)
+	newPrefix := prefix
+	if isLast {
+		newPrefix += "    "
+	} else {
+		newPrefix += "│   "
 	}
-	children := make([]*node, 0, len(n.Children))
+	for i, child := range kids {
+		printCollapsed(child, newPrefix, i == len(kids)-1)
+	}
+}
+
+func sortedChildren(n *node) []*node {
+	out := make([]*node, 0, len(n.Children))
 	for _, c := range n.Children {
-		children = append(children, c)
+		out = append(out, c)
 	}
-	sort.Slice(children, func(i, j int) bool {
-		if children[i].IsDir != children[j].IsDir {
-			return children[i].IsDir
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].IsDir != out[j].IsDir {
+			return out[i].IsDir
 		}
-		return children[i].Name < children[j].Name
+		return out[i].Name < out[j].Name
 	})
+	return out
+}
 
-	for i, child := range children {
-		newPrefix := prefix
-		if isLast {
-			newPrefix += "    "
-		} else {
-			newPrefix += "│   "
-		}
-		child.printTree(newPrefix, i == len(children)-1)
+func firstChild(n *node) *node {
+	for _, c := range n.Children {
+		return c
 	}
+	return nil
 }

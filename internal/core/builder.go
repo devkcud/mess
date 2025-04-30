@@ -28,12 +28,13 @@ type builder struct {
 
 func NewBuilder(base string, logger *messlog.Logger, dry bool, summary *Summary, echo bool) *builder {
 	return &builder{
+		wd:      base,
 		logger:  logger,
 		dryRun:  dry,
 		echo:    echo,
 		summary: summary,
 		tree: &node{
-			Name:     base,
+			Name:     ".",
 			Children: make(map[string]*node),
 			IsDir:    true,
 		},
@@ -178,5 +179,5 @@ func (b *builder) ProcessToken(token string) (err error) {
 }
 
 func (b *builder) PrintDryRunTree() {
-	b.tree.printTree("", true)
+	b.tree.PrintCollapsedTree()
 }
