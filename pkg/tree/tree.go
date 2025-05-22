@@ -255,8 +255,10 @@ func (n *Node) walkFiles(fn func(*Node)) {
 }
 
 func (n *Node) PrintShellCommands() {
-	var leafDirs []string
-	var filePaths []string
+	var (
+		leafDirs  []string
+		filePaths []string
+	)
 
 	var collect func(node *Node, curr string)
 	collect = func(node *Node, curr string) {
@@ -277,10 +279,10 @@ func (n *Node) PrintShellCommands() {
 
 		if !hasSubDir {
 			leafDirs = append(leafDirs, full)
-		} else {
-			for _, c := range node.children {
-				collect(c, full)
-			}
+		}
+
+		for _, c := range node.children {
+			collect(c, full)
 		}
 	}
 
@@ -308,9 +310,9 @@ func (n *Node) PrintShellCommands() {
 	})
 	for _, dir := range leafDirs {
 		parent := findParent(dir)
-		sudo := utils.NeedsElevation(parent)
+		needsElev := utils.NeedsElevation(parent)
 		prefix := ""
-		if sudo {
+		if needsElev {
 			prefix = "sudo "
 		}
 		fmt.Printf("%smkdir -p %s\n", prefix, dir)
@@ -321,9 +323,9 @@ func (n *Node) PrintShellCommands() {
 	})
 	for _, file := range filePaths {
 		parent := findParent(filepath.Dir(file))
-		sudo := utils.NeedsElevation(parent)
+		needsElev := utils.NeedsElevation(parent)
 		prefix := ""
-		if sudo {
+		if needsElev {
 			prefix = "sudo "
 		}
 		fmt.Printf("%stouch %s\n", prefix, file)
