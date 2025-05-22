@@ -1,14 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"time"
 
 	"github.com/devkcud/mess/internal/core"
 	"github.com/devkcud/mess/pkg/messlog"
-	"github.com/devkcud/mess/pkg/therapy"
 )
 
 func main() {
@@ -22,21 +20,14 @@ func main() {
 	cli := core.NewCLI()
 
 	base := cli.StringP("base", "b", dir, "base working directory")
-	dryRun := cli.BoolP("dry-run", "d", false, "simulate file/folder creation without writing anything on disk")
-	echo := cli.Bool("echo", false, "print shell commands instead of creating anything")
-	toggleSummary := cli.BoolP("summary", "s", false, "print a summary after execution")
+	dryRun := cli.BoolP("dry", "d", false, "simulate file/directory creation without writing anything on disk")
+	echo := cli.BoolP("echo", "e", false, "print shell commands instead of creating anything")
 	loglevel := cli.Int("loglevel", int(messlog.LogLevelError), "logging output (0 = error | 1 = warn | 2 = info | 3 = debug | 4 = trace)")
 	help := cli.BoolP("help", "h", false, "help menu")
-	iamaloneandinneedforhelp := cli.BoolP("therapy", "t", false, "maybe you like it")
 
 	tokens, err := cli.Parse()
 	if err != nil {
 		log.Fatalf("failed to parse flags: %v", err)
-	}
-
-	if *iamaloneandinneedforhelp {
-		therapy.HelpMe()
-		os.Exit(69)
 	}
 
 	if *help {
@@ -49,13 +40,8 @@ func main() {
 
 	logger := messlog.NewLogger(messlog.LogLevel(*loglevel))
 
-	var summary *core.Summary
-	if *toggleSummary {
-		summary = &core.Summary{}
-	}
-
 	tokenIterStart := time.Now()
-	builder := core.NewBuilder(*base, logger, *dryRun, summary, *echo)
+	builder := core.NewBuilder(*base, logger, *dryRun, *echo)
 	for i, token := range tokens {
 		iterStart := time.Now()
 
@@ -68,19 +54,24 @@ func main() {
 
 	logger.Trace("Ran all %d tokens in %s", len(tokens), time.Since(tokenIterStart))
 
-	if *toggleSummary {
-		fmt.Println("+------------------+--------+")
-		fmt.Printf("| %-16s | %6s |\n", "OPERATION", "COUNT")
-		fmt.Println("+------------------+--------+")
-		fmt.Printf("| %-16s | %6d |\n", "Folders Created", summary.DirectoriesCreated)
-		fmt.Printf("| %-16s | %6d |\n", "Files Created", summary.FilesCreated)
-		fmt.Printf("| %-16s | %6d |\n", "Token Successes", summary.Successes)
-		fmt.Printf("| %-16s | %6d |\n", "Token Failures", summary.Failures)
-		fmt.Println("+------------------+--------+")
-	}
+	if *dryRun != false || *echo != false {
+		logger.Info("Skipping file builds. Dry Run or Echo detected")
 
-	if *dryRun {
-		builder.PrintDryRunTree()
+		if *dryRun {
+			logger.Debug("Printing Dry Run tree")
+			builder.PrintDryRunTree()
+		}
+
+		if *echo {
+			logger.Debug("Printing Echo tree")
+			builder.PrintEchoFiles()
+		}
+	} else {
+		logger.Info("Building directories and files")
+
+		if err := builder.BuildFiles(); err != nil {
+			logger.Error("Couldn't write dir/file: %v", err)
+		}
 	}
 
 	logger.Trace("Finished in %s", time.Since(scriptTimeStart))
