@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/devkcud/mess/pkg/utils"
@@ -254,56 +255,77 @@ func (n *Node) walkFiles(fn func(*Node)) {
 }
 
 func (n *Node) PrintShellCommands() {
-	n.walkShell("")
-}
+	var leafDirs []string
+	var filePaths []string
 
-func (n *Node) walkShell(prefixPath string) {
-	node := n
-	parts := []string{}
-	for {
-		parts = append(parts, node.relativePath)
-		if len(node.children) == 1 && node.children[0].children != nil {
-			node = node.children[0]
-			continue
+	var collect func(node *Node, curr string)
+	collect = func(node *Node, curr string) {
+		full := filepath.Join(curr, node.relativePath)
+
+		if node.children == nil {
+			filePaths = append(filePaths, full)
+			return
 		}
-		break
+
+		hasSubDir := false
+		for _, c := range node.children {
+			if c.children != nil {
+				hasSubDir = true
+				break
+			}
+		}
+
+		if !hasSubDir {
+			leafDirs = append(leafDirs, full)
+		} else {
+			for _, c := range node.children {
+				collect(c, full)
+			}
+		}
 	}
 
-	collapsed := filepath.Join(parts...)
-	full := filepath.Join(prefixPath, collapsed)
+	collect(n, "")
 
-	dir := full
-	if node.children == nil {
-		dir = filepath.Dir(full)
-	}
-	for {
-		info, err := os.Stat(dir)
-		if err != nil {
-			if os.IsNotExist(err) {
-				dir = filepath.Dir(dir)
+	findParent := func(p string) string {
+		for {
+			info, err := os.Stat(p)
+			if err != nil || !info.IsDir() {
+				p = filepath.Dir(p)
 				continue
 			}
-		} else if !info.IsDir() {
-			dir = filepath.Dir(dir)
-			continue
+			break
 		}
-		break
-	}
-	needsElev := utils.NeedsElevation(dir)
-	sudo := ""
-	if needsElev {
-		sudo = "sudo "
+		return p
 	}
 
-	if node.children != nil {
-		if full != string(filepath.Separator) {
-			fmt.Printf("%smkdir -p %s\n", sudo, full)
+	sort.Slice(leafDirs, func(i, j int) bool {
+		di := strings.Count(leafDirs[i], string(filepath.Separator))
+		dj := strings.Count(leafDirs[j], string(filepath.Separator))
+		if di != dj {
+			return di > dj
 		}
-	} else {
-		fmt.Printf("%stouch %s\n", sudo, full)
+		return strings.ToLower(leafDirs[i]) < strings.ToLower(leafDirs[j])
+	})
+	for _, dir := range leafDirs {
+		parent := findParent(dir)
+		sudo := utils.NeedsElevation(parent)
+		prefix := ""
+		if sudo {
+			prefix = "sudo "
+		}
+		fmt.Printf("%smkdir -p %s\n", prefix, dir)
 	}
 
-	for _, c := range node.children {
-		c.walkShell(full)
+	sort.Slice(filePaths, func(i, j int) bool {
+		return strings.ToLower(filePaths[i]) < strings.ToLower(filePaths[j])
+	})
+	for _, file := range filePaths {
+		parent := findParent(filepath.Dir(file))
+		sudo := utils.NeedsElevation(parent)
+		prefix := ""
+		if sudo {
+			prefix = "sudo "
+		}
+		fmt.Printf("%stouch %s\n", prefix, file)
 	}
 }
