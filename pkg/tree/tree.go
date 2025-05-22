@@ -175,7 +175,7 @@ func (n *Node) print(prefix string, isTail bool, depth int) {
 		parts = append(parts, node.relativePath)
 	}
 	label := utils.CleanPath(strings.Join(parts, "/"))
-	if len(node.children) > 0 {
+	if node.children != nil {
 		if label != "/" {
 			label += "/"
 		}
