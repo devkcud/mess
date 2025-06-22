@@ -10,13 +10,6 @@ import (
 	"github.com/devkcud/mess/pkg/utils"
 )
 
-type Summary struct {
-	DirectoriesCreated int
-	FilesCreated       int
-	Failures           int
-	Successes          int
-}
-
 type builder struct {
 	logger *messlog.Logger
 
