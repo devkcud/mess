@@ -45,6 +45,9 @@ func New(baseDirectory string) *Node {
 	}
 	current := root
 	for _, part := range utils.SplitPath(baseDirectory)[1:] {
+		if part == "" {
+			continue
+		}
 		part = ExpandUserHome(part)
 		current = current.AddDirectory(part)
 	}

@@ -19,10 +19,17 @@ func (n *Node) insertChild(path string, nodeType NodeType) *Node {
 
 	parts := utils.SplitPath(path)
 	for i, part := range parts {
+		if part == "/" {
+			current = current.Root()
+			continue
+		}
+
 		if part == "" || part == "." {
 			continue
 		}
-		part = ExpandUserHome(part)
+		if i == 0 {
+			part = ExpandUserHome(part)
+		}
 
 		if part == ".." {
 			if current.Parent != nil {

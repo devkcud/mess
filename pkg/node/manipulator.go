@@ -7,6 +7,14 @@ import (
 	"github.com/devkcud/mess/pkg/utils"
 )
 
+func (n *Node) Up() *Node {
+	parent := n.Parent
+	if parent == nil {
+		return n
+	}
+	return parent
+}
+
 func (n *Node) Root() *Node {
 	if n.Parent != nil {
 		return n.Parent.Root()
