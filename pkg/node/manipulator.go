@@ -50,3 +50,12 @@ func (n *Node) BuildPathBackwards() string {
 
 	return path
 }
+
+func (n *Node) Collapse() (string, *Node) {
+	name := n.Name
+	for len(n.Children) == 1 {
+		n = n.Children[0]
+		name = filepath.Join(name, n.Name)
+	}
+	return name, n
+}
