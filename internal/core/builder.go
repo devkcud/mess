@@ -78,3 +78,15 @@ func (b *builder) ProcessToken(token string) (err error) {
 
 	return
 }
+
+func (b *builder) PrintDryRunTree() {
+	b.root.Root().PrintNodeTree()
+}
+
+func (b *builder) PrintEchoFiles() {
+	b.root.Root().PrintCommands()
+}
+
+func (b *builder) BuildFiles() error {
+	return nil
+}
