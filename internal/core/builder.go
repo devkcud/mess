@@ -88,5 +88,5 @@ func (b *builder) PrintEchoFiles() {
 }
 
 func (b *builder) BuildFiles() error {
-	return nil
+	return b.root.Root().BuildFiles()
 }

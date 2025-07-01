@@ -3,7 +3,6 @@ package utils
 import (
 	"os"
 	"os/user"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"syscall"
@@ -33,14 +32,6 @@ func SplitPath(path string) []string {
 	}
 
 	return parts
-}
-
-func WriteFile(path string, data string) error {
-	return os.WriteFile(path, []byte(data), FilePerm)
-}
-
-func WriteDirectories(paths ...string) error {
-	return os.MkdirAll(filepath.Join(paths...), DirPerm)
 }
 
 func DoesPathExist(path string) bool {
