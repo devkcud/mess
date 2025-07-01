@@ -86,6 +86,14 @@ func (b *builder) PrintDryRunTree() {
 func (b *builder) PrintEchoFiles() {
 	b.root.Root().PrintCommands()
 }
+func (b *builder) PrintJSON() error {
+	j, err := b.root.Root().PrintJSON("    ")
+	defer fmt.Println(j)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func (b *builder) BuildFiles() error {
 	b.logger.Debug("Building files...")

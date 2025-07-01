@@ -1,6 +1,7 @@
 package node
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/devkcud/mess/pkg/utils"
@@ -180,4 +181,12 @@ func (n *Node) PrintCommands() {
 	for _, cmd := range chowns {
 		fmt.Println(cmd)
 	}
+}
+
+func (n *Node) PrintJSON(indent string) (string, error) {
+	bytes, err := json.MarshalIndent(n, "", indent)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), err
 }

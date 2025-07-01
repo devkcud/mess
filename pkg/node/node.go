@@ -10,16 +10,16 @@ import (
 type NodeType int
 
 type Node struct {
-	Name string
+	Name string `json:"name"`
 
-	Type NodeType
+	Type NodeType `json:"type"`
 
-	Permission     os.FileMode
-	NeedsElevation bool
-	Owner          string
+	Permission     os.FileMode `json:"permission"`
+	NeedsElevation bool        `json:"needs_elevation"`
+	Owner          string      `json:"owner"`
 
-	Parent   *Node `json:"-"`
-	Children []*Node
+	Parent   *Node   `json:"-"`
+	Children []*Node `json:"children"`
 }
 
 const (

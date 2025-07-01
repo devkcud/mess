@@ -22,6 +22,7 @@ func main() {
 	base := cli.StringP("base", "b", dir, "base working directory")
 	dryRun := cli.BoolP("dry", "d", false, "simulate file/directory creation without writing anything on disk")
 	echo := cli.BoolP("echo", "e", false, "print shell commands instead of creating anything")
+	printJson := cli.BoolP("json", "j", false, "print file/directory list as json")
 	loglevel := cli.Int("loglevel", int(messlog.LogLevelError), "logging output (0 = error | 1 = warn | 2 = info | 3 = debug | 4 = trace)")
 	help := cli.BoolP("help", "h", false, "help menu")
 
@@ -54,7 +55,7 @@ func main() {
 
 	logger.Trace("Ran all %d tokens in %s", len(tokens), time.Since(tokenIterStart))
 
-	if *dryRun != false || *echo != false {
+	if *dryRun != false || *echo != false || *printJson != false {
 		logger.Info("Skipping file builds. Dry Run or Echo detected")
 
 		if *dryRun {
@@ -65,6 +66,13 @@ func main() {
 		if *echo {
 			logger.Debug("Printing Echo tree")
 			builder.PrintEchoFiles()
+		}
+
+		if *printJson {
+			logger.Debug("Printing json tree")
+			if err := builder.PrintJSON(); err != nil {
+				logger.Error("Couldn't print tree as json: %v", err)
+			}
 		}
 	} else {
 		logger.Info("Building directories and files")
