@@ -2,7 +2,6 @@ package node
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/devkcud/mess/pkg/utils"
 )
@@ -10,7 +9,7 @@ import (
 func (n *Node) PrintNodeTree() {
 	rootPath, rootNode := n.Collapse()
 
-	if !strings.HasSuffix(rootPath, "/") {
+	if rootNode.Type == TypeDirectory {
 		rootPath += "/"
 	}
 
@@ -69,6 +68,9 @@ func (n *Node) PrintCommands() {
 		}
 
 		_, deepest := node.Collapse()
+		if deepest.Type == TypeFile {
+			deepest = deepest.Up()
+		}
 		fullPath := ExpandUserHome(deepest.BuildPathBackwards())
 
 		if deepest.Parent == nil {
