@@ -7,7 +7,7 @@ Compared to older tools like `mk`, mess is more intuitive, flexible, and built f
 ## 🚀 Usage
 
 ```sh
-mess [-flags] <..|dir/|dir/file|file>...
+mess [-flags] <..|dir/|dir/file|file>[@<user>|%<perms>]...
 ```
 
 ### 📐 Behavior Rules
@@ -16,6 +16,10 @@ mess [-flags] <..|dir/|dir/file|file>...
 - `file` → Creates a file in the current stack location.
 - `dir/file` → Creates the specified directory and file, but does not push the directory to the stack.
 - `..` → Pops the last directory off the stack. Back up one level like a well-behaved script.
+- `@<user>` → Defines the user of the directory or file. Example: `sudo mess dir@root/file@pato`
+- `%<perms>` → Defines the octal permission of the directory or file. Example: `sudo mess dir%0555/file`
+
+> Tip: You can mash everything together: `mess dir@pato%555/ file1@root file2@testuser projects%0/`
 
 ### 🧩 Flags
 
