@@ -27,6 +27,7 @@ func (n *Node) insertChild(path string, nodeType NodeType) *Node {
 		if part == "" || part == "." {
 			continue
 		}
+
 		if i == 0 {
 			part = ExpandUserHome(part)
 		}
@@ -37,6 +38,12 @@ func (n *Node) insertChild(path string, nodeType NodeType) *Node {
 			}
 			continue
 		}
+
+		information, err := ParsePathPart(part)
+		if err != nil {
+			panic(err) // TODO: Handle errors better
+		}
+		part = information.Name
 
 		found := false
 
@@ -57,6 +64,10 @@ func (n *Node) insertChild(path string, nodeType NodeType) *Node {
 			perm := utils.FilePerm
 			if newType == TypeDirectory {
 				perm = utils.DirPerm
+			}
+
+			if information.Permission != nil {
+				perm = *information.Permission
 			}
 
 			newNode := &Node{
@@ -84,6 +95,10 @@ func (n *Node) insertChild(path string, nodeType NodeType) *Node {
 				} else {
 					newNode.Owner = utils.CurrentUser
 				}
+			}
+
+			if information.Owner != "" {
+				newNode.Owner = information.Owner
 			}
 
 			current.Children = append(current.Children, newNode)
