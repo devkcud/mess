@@ -11,7 +11,7 @@ type flagWrapper struct {
 }
 
 func simpleHelp(fs *flag.FlagSet) {
-	fmt.Fprintf(fs.Output(), "Usage: %s [-flags] <..|dir/|dir/file|file>...\n", fs.Name())
+	fmt.Fprintf(fs.Output(), "Usage: %s [-flags] <..|dir/|dir/file|file>[@<owner>|%%<perms>]...\n", fs.Name())
 }
 
 func NewCLI() *flagWrapper {

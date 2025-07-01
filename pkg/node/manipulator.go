@@ -4,7 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/user"
 	"path/filepath"
+	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/devkcud/mess/pkg/utils"
@@ -124,14 +127,42 @@ func (n *Node) BuildFiles() error {
 	}
 
 	for _, dir := range dirs {
+		u, err := user.Lookup(dir.owner)
+		if err != nil {
+			return err
+		}
+
 		if err := os.MkdirAll(dir.fpath, dir.perms); err != nil {
 			return fmt.Errorf("%w: %s", err, dir.fpath)
+		}
+
+		if runtime.GOOS != "windows" {
+			uid, _ := strconv.ParseInt(u.Uid, 10, 32)
+			gid, _ := strconv.ParseInt(u.Gid, 10, 32)
+
+			if err := os.Chown(dir.fpath, int(uid), int(gid)); err != nil {
+				return fmt.Errorf("%w: %s", err, dir.owner)
+			}
 		}
 	}
 
 	for _, file := range files {
+		u, err := user.Lookup(file.owner)
+		if err != nil {
+			return err
+		}
+
 		if err := os.WriteFile(file.fpath, []byte(""), file.perms); err != nil {
 			return fmt.Errorf("%w: %s", err, file.fpath)
+		}
+
+		if runtime.GOOS != "windows" {
+			uid, _ := strconv.ParseInt(u.Uid, 10, 32)
+			gid, _ := strconv.ParseInt(u.Gid, 10, 32)
+
+			if err := os.Chown(file.fpath, int(uid), int(gid)); err != nil {
+				return fmt.Errorf("%w: %s", err, file.owner)
+			}
 		}
 	}
 
