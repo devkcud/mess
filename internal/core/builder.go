@@ -88,5 +88,8 @@ func (b *builder) PrintEchoFiles() {
 }
 
 func (b *builder) BuildFiles() error {
+	b.logger.Debug("Building files...")
+	defer b.logger.Debug("Build done!")
+
 	return b.root.Root().BuildFiles()
 }
