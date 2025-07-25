@@ -3,6 +3,7 @@ package node
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/devkcud/mess/pkg/utils"
 )
@@ -10,7 +11,7 @@ import (
 func (n *Node) PrintNodeTree() {
 	rootPath, rootNode := n.Collapse()
 
-	if rootNode.Type == TypeDirectory {
+	if rootNode.Type == TypeDirectory && !strings.HasSuffix(rootNode.Name, "/") {
 		rootPath += "/"
 	}
 
